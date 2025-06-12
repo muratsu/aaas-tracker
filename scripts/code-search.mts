@@ -3,8 +3,8 @@ import fs from 'node:fs/promises';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const GITHUB_USERNAME = process.env.GITHUB_USERNAME;
-const GITHUB_PASSWORD = process.env.GITHUB_PASSWORD;
+const GITHUB_USERNAME = process.env.GH_USERNAME;
+const GITHUB_PASSWORD = process.env.GH_PASSWORD;
 
 if (!GITHUB_USERNAME || !GITHUB_PASSWORD) {
   throw new Error('GITHUB_USERNAME and GITHUB_PASSWORD environment variables are required');
