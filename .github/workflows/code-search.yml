@@ -1,10 +1,10 @@
 name: Daily Code Search
-
 on:
   schedule:
     - cron: '0 3 * * *'   # every day at 03:00 UTC
   workflow_dispatch:      # allows manual triggering
-
+permissions:
+  contents: write
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -37,7 +37,7 @@ jobs:
         env:
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_PASSWORD: ${{ secrets.GH_PASSWORD }}
-          GH_OPT: ${{ secrets.GH_OPT }}
+          GH_OTP: ${{ secrets.GH_OTP }}
       
       - name: Commit and push if changes
         run: |
