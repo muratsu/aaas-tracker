@@ -6,6 +6,10 @@ dotenv.config();
 const GITHUB_USERNAME = process.env.GITHUB_USERNAME;
 const GITHUB_PASSWORD = process.env.GITHUB_PASSWORD;
 
+if (!GITHUB_USERNAME || !GITHUB_PASSWORD) {
+  throw new Error('GITHUB_USERNAME and GITHUB_PASSWORD environment variables are required');
+}
+
 interface Service {
   name: string;
   searchQuery: string;
@@ -29,10 +33,6 @@ const services: Service[] = [
     dataFile: "data/huggingface-code-search.json"
   }
 ];
-
-if (!GITHUB_USERNAME || !GITHUB_PASSWORD) {
-  throw new Error('GITHUB_USERNAME and GITHUB_PASSWORD environment variables are required');
-}
 
 async function saveResult(service: Service, count: number) {
   const row = {
