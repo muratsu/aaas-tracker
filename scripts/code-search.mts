@@ -76,6 +76,8 @@ async function loginToGitHub(page: Page) {
   // If OTP is required, generate and fill it
   const otp = generateOTP(GITHUB_OTP!);
   await page.fill('#app_totp', otp);
+
+  await page.waitForURL('https://github.com');
 }
 
 async function scrapeGitHubSearch(page: Page, service: Service) {

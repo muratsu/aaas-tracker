@@ -20,17 +20,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
+      - uses: microsoft/playwright-github-action@v1
         with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-      
-      - name: Install Playwright Chrome
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
+          cache: true
+          browsers: chromium
       
       - name: Run code search script
         run: npm run script:code-search
