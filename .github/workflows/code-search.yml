@@ -37,6 +37,7 @@ jobs:
         env:
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_PASSWORD: ${{ secrets.GH_PASSWORD }}
+          GH_OPT: ${{ secrets.GH_OPT }}
       
       - name: Commit and push if changes
         run: |

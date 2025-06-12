@@ -1,13 +1,15 @@
-import { chromium } from 'playwright';
+import { chromium, Page } from 'playwright';
 import fs from 'node:fs/promises';
 import dotenv from 'dotenv';
+import { generateOTP } from './helpers.mts';
 dotenv.config();
 
 const GITHUB_USERNAME = process.env.GH_USERNAME;
 const GITHUB_PASSWORD = process.env.GH_PASSWORD;
+const GITHUB_OTP = process.env.GH_OTP;
 
-if (!GITHUB_USERNAME || !GITHUB_PASSWORD) {
-  throw new Error('GITHUB_USERNAME and GITHUB_PASSWORD environment variables are required');
+if (!GITHUB_USERNAME || !GITHUB_PASSWORD || !GITHUB_OTP) {
+  throw new Error('GITHUB_USERNAME, GITHUB_PASSWORD, and GITHUB_OTP environment variables are required');
 }
 
 interface Service {
@@ -59,34 +61,34 @@ async function parseResultCount(resultText: string | null): Promise<number> {
   return unit.toLowerCase() === 'k' ? value * 1000 : value * 1000000;
 }
 
-async function scrapeGitHubSearch(service: Service) {
-  const browser = await chromium.launch({
-    headless: true
-  });
+async function loginToGitHub(page: Page) {
+  // Navigate to GitHub login
+  await page.goto('https://github.com/login');
+  
+  // Fill in login form
+  await page.fill('#login_field', GITHUB_USERNAME!);
+  await page.fill('#password', GITHUB_PASSWORD!);
+  
+  // Click login button and wait for navigation
+  await page.click('[name="commit"]');
+  await page.waitForURL('https://github.com/sessions/two-factor/app')
 
+  // If OTP is required, generate and fill it
+  const otp = generateOTP(GITHUB_OTP!);
+  await page.fill('#app_totp', otp);
+
+  // Wait for login to complete
+  await page.waitForTimeout(10000);
+}
+
+async function scrapeGitHubSearch(page: Page, service: Service) {
   try {
-    const context = await browser.newContext({
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-      viewport: { width: 1280, height: 800 },
-    });
-
-    const page = await context.newPage();
-
-    // Navigate to GitHub login
-    await page.goto('https://github.com/login');
-    
-    // Fill in login form
-    await page.fill('#login_field', GITHUB_USERNAME);
-    await page.fill('#password', GITHUB_PASSWORD);
-    
-    // Click login button and wait for navigation
-    await Promise.all([
-      page.waitForNavigation(),
-      page.click('[name="commit"]')
-    ]);
-
     // Navigate to search page
     await page.goto(`https://github.com/search?q=${service.searchQuery}&type=code`);
+
+    // Wait for 10 seconds to let the page load
+    // TODO: Remove this once we have a better way to wait for the page to load
+    await page.waitForTimeout(10000);
 
     // Wait for the results to load
     await page.waitForSelector('[data-testid="resolved-count-label"]');
@@ -98,16 +100,35 @@ async function scrapeGitHubSearch(service: Service) {
 
   } catch (error) {
     console.error(`Error during scraping for ${service.name}:`, error);
-  } finally {
-    await browser.close();
   }
 }
 
 // Run the script for all services
 async function runAllServices() {
-  for (const service of services) {
-    console.log(`Scraping data for ${service.name}...`);
-    await scrapeGitHubSearch(service);
+  const browser = await chromium.launch({
+    headless: false
+  });
+
+  try {
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+      viewport: { width: 1280, height: 800 },
+    });
+
+    const page = await context.newPage();
+    
+    // Login once at the start
+    await loginToGitHub(page);
+
+    // Run all scraping operations using the same session
+    for (const service of services) {
+      console.log(`Scraping data for ${service.name}...`);
+      await scrapeGitHubSearch(page, service);
+    }
+  } catch (error) {
+    console.error('Error during script execution:', error);
+  } finally {
+    await browser.close();
   }
 }
 
