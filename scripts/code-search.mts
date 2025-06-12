@@ -76,19 +76,12 @@ async function loginToGitHub(page: Page) {
   // If OTP is required, generate and fill it
   const otp = generateOTP(GITHUB_OTP!);
   await page.fill('#app_totp', otp);
-
-  // Wait for login to complete
-  await page.waitForTimeout(10000);
 }
 
 async function scrapeGitHubSearch(page: Page, service: Service) {
   try {
     // Navigate to search page
     await page.goto(`https://github.com/search?q=${service.searchQuery}&type=code`);
-
-    // Wait for 10 seconds to let the page load
-    // TODO: Remove this once we have a better way to wait for the page to load
-    await page.waitForTimeout(10000);
 
     // Wait for the results to load
     await page.waitForSelector('[data-testid="resolved-count-label"]');
@@ -106,7 +99,7 @@ async function scrapeGitHubSearch(page: Page, service: Service) {
 // Run the script for all services
 async function runAllServices() {
   const browser = await chromium.launch({
-    headless: false
+    headless: true
   });
 
   try {
