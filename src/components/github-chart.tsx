@@ -8,6 +8,11 @@ interface CompetitorData {
   color: string
 }
 
+interface ChartDataPoint {
+  date: string
+  [key: string]: string | number
+}
+
 interface GithubChartProps {
   data: CompetitorData[]
   height?: number
@@ -18,7 +23,7 @@ export function GithubChart({ data, height = 400 }: GithubChartProps) {
   const chartData =
     data.length > 0
       ? data[0].data.map((item) => {
-          const dataPoint: any = { date: item.date }
+          const dataPoint: ChartDataPoint = { date: item.date }
 
           data.forEach((competitor) => {
             const matchingData = competitor.data.find((d) => d.date === item.date)

@@ -15,10 +15,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BarChart3, LineChart, PieChart, TrendingUp, Target, Upload, RefreshCw } from "lucide-react"
+import { BarChart3, LineChart, PieChart, TrendingUp, Target } from "lucide-react"
 import { GithubChart } from "@/components/github-chart"
 // import { MetricsOverview } from "@/components/metrics-overview"
 // import { MarketShareChart } from "@/components/market-share-chart"
