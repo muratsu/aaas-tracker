@@ -61,7 +61,7 @@ async function parseResultCount(resultText: string | null): Promise<number> {
 
 async function scrapeGitHubSearch(service: Service) {
   const browser = await chromium.launch({
-    headless: false
+    headless: true
   });
 
   try {
